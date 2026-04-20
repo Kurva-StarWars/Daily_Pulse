@@ -29,6 +29,7 @@
             margin: 0; 
             padding: 0; 
             user-select: none; 
+            overflow-x: hidden;
         }
         
         header { 
@@ -77,6 +78,7 @@
             white-space: nowrap; 
             font-weight: 800; 
             font-size: 12px; 
+            transition: all 0.2s;
         }
         nav button.active { background: var(--accent); color: #0d1117; border-color: var(--accent); }
 
@@ -85,9 +87,9 @@
         
         .card { background: var(--card); border-radius: 22px; border: 1px solid #30363d; padding: 22px; animation: pop 0.3s ease-out; }
         @keyframes pop { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .card-top { display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center; }
-        .card-tag { font-size: 0.65rem; font-weight: 900; color: var(--accent); text-transform: uppercase; }
-        .card-time { font-size: 0.7rem; color: var(--time); font-weight: 600; text-align: right; line-height: 1.2; }
+        .card-top { display: flex; justify-content: space-between; margin-bottom: 10px; align-items: flex-start; }
+        .card-tag { font-size: 0.65rem; font-weight: 900; color: var(--accent); text-transform: uppercase; background: rgba(88,166,255,0.1); padding: 4px 8px; border-radius: 6px; }
+        .card-time { font-size: 0.7rem; color: var(--time); font-weight: 600; text-align: right; line-height: 1.3; }
         .card-title { font-size: 1.15rem; font-weight: 800; color: #fff; line-height: 1.4; margin-bottom: 20px; }
         .card-btn { background: var(--success); color: #fff; border: none; padding: 15px; border-radius: 14px; font-weight: 900; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; font-size: 13px; }
 
@@ -98,6 +100,9 @@
         .loader { text-align: center; padding: 80px 20px; color: #8b949e; }
         .spin { width: 40px; height: 40px; border: 3px solid rgba(88,166,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: s 0.8s linear infinite; margin: 0 auto 15px; }
         @keyframes s { to { transform: rotate(360deg); } }
+        
+        .error-box { background: rgba(248, 81, 73, 0.1); border: 1px solid #f85149; border-radius: 15px; padding: 20px; text-align: center; color: #f85149; }
+        .retry-btn { margin-top: 15px; background: #f85149; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -119,7 +124,7 @@
     </div>
 
     <nav id="nav">
-        <button class="active" onclick="loadAI('последние важные мировые новости за этот час', this)">ГЛАВНОЕ 🔥</button>
+        <button id="btn-main" class="active" onclick="loadAI('последние важные мировые новости за этот час', this)">ГЛАВНОЕ 🔥</button>
         <button onclick="loadAI('свежие игровые новости, анонсы и релизы игр', this)">ИГРЫ 🎮</button>
         <button onclick="loadAI('новости AI, нейросетей и технологий сегодня', this)">ТЕХНО ⚡️</button>
         <button onclick="loadAI('новости науки и космоса', this)">НАУКА 🧬</button>
@@ -138,16 +143,16 @@
 
 <script>
     const apiKey = "";
+    let currentTopic = 'последние важные мировые новости за этот час';
 
     async function queryAI(prompt, json = false) {
         const now = new Date().toLocaleString('ru-RU');
-        const finalPrompt = `${prompt}\n\nТекущее время и дата: ${now}.`;
+        const finalPrompt = `${prompt}\n\nВАЖНО: Ищи данные на текущую дату: ${now}. Не используй старые шаблоны.`;
         
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-        const body = { contents: [{ parts: [{ text: finalPrompt }] }] };
-
-        if (json) {
-            body.generationConfig = {
+        const body = { 
+            contents: [{ parts: [{ text: finalPrompt }] }],
+            generationConfig: json ? {
                 responseMimeType: "application/json",
                 responseSchema: {
                     type: "OBJECT",
@@ -159,33 +164,51 @@
                                 properties: {
                                     title: { type: "STRING" },
                                     tag: { type: "STRING" },
-                                    time: { type: "STRING", description: "Время (ЧЧ:ММ)" },
-                                    date: { type: "STRING", description: "Дата (ДД.ММ)" }
+                                    time: { type: "STRING" },
+                                    date: { type: "STRING" }
                                 }
                             }
                         }
                     }
                 }
-            };
-        }
+            } : {}
+        };
 
-        const res = await fetch(url, { method: 'POST', body: JSON.stringify(body) });
-        const d = await res.json();
-        return d.candidates[0].content.parts[0].text;
+        // Экспоненциальная задержка при повторах (Rule-based implementation)
+        for (let i = 0; i < 3; i++) {
+            try {
+                const res = await fetch(url, { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(body) 
+                });
+                if (!res.ok) throw new Error('API Error');
+                const d = await res.json();
+                return d.candidates[0].content.parts[0].text;
+            } catch (e) {
+                if (i === 2) throw e;
+                await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
+            }
+        }
     }
 
     async function loadAI(topic, btn) {
+        currentTopic = topic;
         const grid = document.getElementById('feed');
+        
         if(btn) {
             document.querySelectorAll('#nav button').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById('searchInput').value = ''; 
         }
+
         grid.innerHTML = '<div class="loader"><div class="spin"></div><p>Сканирую реальность... 📡</p></div>';
 
         try {
-            const result = await queryAI(`Найди 5 актуальных новостей на тему: "${topic}". Сортируй: новые сверху.`, true);
+            const result = await queryAI(`Найди 5 РЕАЛЬНЫХ новостей: "${topic}". Обязательно укажи дату и время.`, true);
             const data = JSON.parse(result).news;
+
+            if(!data || data.length === 0) throw new Error('Empty data');
 
             grid.innerHTML = '';
             data.forEach(n => {
@@ -195,18 +218,23 @@
                     <div class="card-top">
                         <div class="card-tag">${n.tag || 'LIVE'}</div>
                         <div class="card-time">
-                            <i class="fa-regular fa-calendar"></i> ${n.date || ''}<br>
-                            <i class="fa-regular fa-clock"></i> ${n.time || ''}
+                            <i class="fa-regular fa-calendar"></i> ${n.date || 'Сегодня'}<br>
+                            <i class="fa-regular fa-clock"></i> ${n.time || '--:--'}
                         </div>
                     </div>
                     <div class="card-title">${n.title}</div>
-                    <button class="card-btn" onclick="openDeep('${n.title}')">
+                    <button class="card-btn" onclick="openDeep('${n.title.replace(/'/g, "\\'")}')">
                         <i class="fa-solid fa-bolt"></i> АНАЛИЗ ИИ
                     </button>`;
                 grid.appendChild(card);
             });
         } catch (e) {
-            grid.innerHTML = '<div class="loader">⚠️ Сбой в матрице. Попробуй обновить.</div>';
+            grid.innerHTML = `
+                <div class="error-box">
+                    <i class="fa-solid fa-triangle-exclamation" style="font-size:30px"></i>
+                    <p style="margin-top:10px">Сбой в матрице. Проверь VPN или попробуй еще раз.</p>
+                    <button class="retry-btn" onclick="loadAI(currentTopic)">ПОВТОРИТЬ СКАН</button>
+                </div>`;
         }
     }
 
@@ -215,7 +243,7 @@
         const val = document.getElementById('searchInput').value.trim();
         if(!val) return;
         document.querySelectorAll('#nav button').forEach(b => b.classList.remove('active'));
-        loadAI(`новости по теме: ${val}`);
+        loadAI(`новости по запросу: ${val}`);
     }
 
     async function openDeep(title) {
@@ -226,16 +254,21 @@
         c.innerHTML = '<div class="loader"><div class="spin"></div><p>ИИ восстанавливает детали... 🧠</p></div>';
 
         try {
-            const text = await queryAI(`Напиши подробную статью на русском про "${title}". Используй параграфы и эмодзи.`);
+            const text = await queryAI(`Напиши подробную статью на русском языке про событие: "${title}". Используй параграфы, подзаголовки и эмодзи.`);
             c.innerHTML = `<h1>${title}</h1><hr style="border:0; border-top:1px solid #30363d; margin:20px 0;">` + 
                           text.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').join('');
         } catch (e) {
-            c.innerHTML = '<div class="loader">Ошибка расшифровки данных.</div>';
+            c.innerHTML = '<div class="error-box"><p>Не удалось расшифровать данные. Попробуй позже.</p></div>';
         }
     }
 
-    function closeR() { document.getElementById('reader').style.display = 'none'; document.body.style.overflow = 'auto'; }
-    window.onload = () => loadAI('главные мировые новости за этот час');
+    function closeR() { 
+        document.getElementById('reader').style.display = 'none'; 
+        document.body.style.overflow = 'auto'; 
+    }
+
+    // Первичный запуск
+    window.onload = () => loadAI('последние важные мировые новости за этот час', document.getElementById('btn-main'));
 </script>
 
 </body>
