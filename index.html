@@ -3,95 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Daily Pulse | Trinity</title>
+    <title>Daily Pulse | SSC Edition</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { 
-            --bg: #050505; 
+            --bg: #030405; 
             --card: #0d1117; 
-            --accent: #58a6ff; 
-            --fox: #ff7b72;
+            --ssc-primary: #8b5cf6; /* Фиолетовый SSC */
+            --ssc-secondary: #ff7b72; /* Лисий рыжий */
+            --blue: #58a6ff;
             --text: #e6edf3; 
-            --header: rgba(22, 27, 34, 0.8); 
             --border: #30363d;
+            --glass: rgba(22, 27, 34, 0.8);
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { 
             background: var(--bg); color: var(--text); 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; 
             margin: 0; padding: 0; overflow-x: hidden;
-            background-image: radial-gradient(circle at top right, #161b22, transparent);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 123, 114, 0.05) 0%, transparent 20%);
             background-attachment: fixed;
         }
         
         header { 
-            background: var(--header); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            position: sticky; top: 0; z-index: 100; 
+            background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            position: sticky; top: 0; z-index: 1000; 
             border-bottom: 1px solid var(--border); padding-top: env(safe-area-inset-top); 
         }
-        .logo-box { display: flex; flex-direction: column; align-items: center; padding: 10px 0; }
-        .logo-txt { font-size: 1.1rem; font-weight: 900; letter-spacing: 3px; color: #fff; text-transform: uppercase; margin: 0; }
-        .engine-tag { font-size: 9px; color: var(--accent); font-weight: 800; letter-spacing: 1px; margin-top: 2px; }
+        .logo-box { display: flex; flex-direction: column; align-items: center; padding: 15px 0 10px; }
+        .logo-txt { font-size: 1.3rem; font-weight: 950; letter-spacing: 5px; color: #fff; text-transform: uppercase; margin: 0; }
+        .ssc-tag { font-size: 9px; color: var(--ssc-primary); font-weight: 900; letter-spacing: 2px; margin-top: 5px; background: rgba(139, 92, 246, 0.1); padding: 2px 8px; border-radius: 10px; }
 
-        .search-container { padding: 0 15px 10px; }
-        .search-wrapper { 
-            display: flex; background: rgba(0,0,0,0.5); border: 1px solid var(--border); 
-            border-radius: 12px; padding: 10px 15px; align-items: center; gap: 10px;
+        .search-container { padding: 0 15px 15px; }
+        .search-box { 
+            display: flex; background: rgba(0,0,0,0.4); border: 1px solid var(--border); 
+            border-radius: 14px; padding: 12px 18px; align-items: center; gap: 12px;
+            transition: 0.3s;
         }
-        .search-wrapper input { background: transparent; border: none; color: #fff; flex: 1; font-size: 16px; }
+        .search-box:focus-within { border-color: var(--ssc-primary); box-shadow: 0 0 15px rgba(139, 92, 246, 0.2); }
+        .search-box input { background: transparent; border: none; color: #fff; flex: 1; font-size: 16px; font-weight: 500; }
 
-        .nav-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 5px 15px 12px; scrollbar-width: none; }
-        .nav-tabs::-webkit-scrollbar { display: none; }
-        .nav-tabs button { 
-            background: #21262d; color: #8b949e; border: 1px solid var(--border); 
-            padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: 12px; 
-            white-space: nowrap; transition: 0.2s; cursor: pointer;
+        .tabs-nav { display: flex; gap: 10px; overflow-x: auto; padding: 0 15px 15px; scrollbar-width: none; }
+        .tabs-nav::-webkit-scrollbar { display: none; }
+        .tabs-nav button { 
+            background: #161b22; color: #8b949e; border: 1px solid var(--border); 
+            padding: 10px 20px; border-radius: 12px; font-weight: 800; font-size: 12px; 
+            white-space: nowrap; transition: 0.3s; cursor: pointer;
         }
-        .nav-tabs button.active { background: var(--accent); color: #000; border-color: var(--accent); }
+        .tabs-nav button.active { background: #fff; color: #000; border-color: #fff; transform: translateY(-2px); }
 
-        main { max-width: 600px; margin: 0 auto; padding: 10px 15px 100px; }
-        #feed { display: flex; flex-direction: column; gap: 12px; }
+        main { max-width: 600px; margin: 0 auto; padding: 10px 15px 120px; }
+        #feed { display: flex; flex-direction: column; gap: 15px; }
         
-        .news-item { 
-            background: var(--card); border: 1px solid var(--border); border-radius: 18px; 
-            padding: 20px; animation: slideIn 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        .card { 
+            background: var(--card); border: 1px solid var(--border); border-radius: 22px; 
+            padding: 20px; animation: cardEntry 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative; overflow: hidden;
         }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes cardEntry { from { opacity: 0; transform: scale(0.95) translateY(30px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         
-        .news-item::after {
-            content: ''; position: absolute; top: 0; right: 0; width: 60px; height: 60px;
-            background: linear-gradient(135deg, transparent 50%, rgba(88,166,255,0.05) 50%);
-        }
+        .card-glow { position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%); }
 
-        .meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .tag { font-size: 10px; font-weight: 900; color: var(--accent); background: rgba(88,166,255,0.1); padding: 4px 10px; border-radius: 6px; text-transform: uppercase; }
-        .date { font-size: 10px; color: #8b949e; font-weight: 600; }
-        .title-text { font-size: 1.2rem; font-weight: 800; color: #fff; line-height: 1.4; margin-bottom: 15px; }
+        .card-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .card-tag { font-size: 10px; font-weight: 900; color: var(--ssc-primary); text-transform: uppercase; letter-spacing: 1px; }
+        .card-time { font-size: 10px; color: #8b949e; }
+        .card-title { font-size: 1.25rem; font-weight: 800; color: #f0f6fc; line-height: 1.4; margin-bottom: 20px; }
         
-        .action-btn { 
-            background: linear-gradient(135deg, #238636, #2ea043); color: #fff; border: none; 
-            padding: 14px; border-radius: 12px; width: 100%; font-weight: 800; 
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
-            font-size: 13px; box-shadow: 0 4px 12px rgba(35, 134, 54, 0.2);
+        .card-btn { 
+            background: #21262d; color: var(--blue); border: 1px solid var(--border); 
+            padding: 14px; border-radius: 14px; width: 100%; font-weight: 800; 
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px;
+            font-size: 13px; transition: 0.2s;
         }
-        .action-btn:active { transform: scale(0.98); opacity: 0.9; }
+        .card-btn:active { background: #30363d; transform: scale(0.97); }
 
-        .loading-vibe { text-align: center; padding: 80px 20px; }
-        .trinity-loader { 
-            width: 60px; height: 60px; border: 3px solid rgba(88,166,255,0.1); 
-            border-top: 3px solid var(--accent); border-right: 3px solid var(--fox); border-radius: 50%; 
-            animation: rotate 1s cubic-bezier(0.5, 0, 0.5, 1) infinite; margin: 0 auto 20px;
+        /* SSC LOADER */
+        .ssc-loader-wrap { text-align: center; padding: 100px 20px; }
+        .ssc-spinner { 
+            width: 50px; height: 50px; border: 4px solid rgba(139, 92, 246, 0.1); 
+            border-top: 4px solid var(--ssc-primary); border-radius: 50%; 
+            animation: spin 1s linear infinite; margin: 0 auto 20px;
         }
-        @keyframes rotate { to { transform: rotate(360deg); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        #overlay { position: fixed; inset: 0; background: var(--bg); z-index: 500; display: none; flex-direction: column; }
-        .over-head { padding: 15px 20px; background: var(--header); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding-top: env(safe-area-inset-top); }
-        .over-content { flex: 1; overflow-y: auto; padding: 25px; line-height: 1.8; color: #d1d9e0; }
+        /* READER */
+        #overlay { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; flex-direction: column; }
+        .over-header { padding: 15px 20px; background: var(--glass); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding-top: env(safe-area-inset-top); }
+        .over-body { flex: 1; overflow-y: auto; padding: 30px 25px; line-height: 1.8; font-size: 1.15rem; color: #d1d9e0; }
         
-        .error-card { background: rgba(255, 123, 114, 0.05); border: 1px dashed var(--fox); padding: 40px 20px; border-radius: 20px; text-align: center; }
-        .retry-btn { background: var(--fox); color: #fff; border: none; padding: 12px 30px; border-radius: 12px; font-weight: 800; margin-top: 20px; cursor: pointer; }
+        .error-state { background: rgba(255, 123, 114, 0.05); border: 1px dashed var(--ssc-secondary); padding: 40px 20px; border-radius: 24px; text-align: center; }
+        .btn-ssc-retry { background: var(--ssc-primary); color: #fff; border: none; padding: 14px 35px; border-radius: 14px; font-weight: 800; margin-top: 25px; cursor: pointer; box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3); }
     </style>
 </head>
 <body>
@@ -99,24 +103,24 @@
 <header>
     <div class="logo-box">
         <h1 class="logo-txt">Daily Pulse</h1>
-        <div class="engine-tag">TRINITY: DOXY • FOXY • GEMINI</div>
+        <div class="ssc-tag">SSC: SOFT SLIPPERS ENGINE ⛸️</div>
     </div>
     
     <div class="search-container">
         <form onsubmit="handleSearch(event)">
-            <div class="search-wrapper">
-                <i class="fa-solid fa-satellite-dish" style="color:var(--accent)"></i>
-                <input type="text" id="searchInput" placeholder="Сканировать реальность...">
+            <div class="search-box">
+                <i class="fa-solid fa-wind" style="color:var(--ssc-primary)"></i>
+                <input type="text" id="searchInput" placeholder="Поиск (бесшумно, как в тапочках)...">
             </div>
         </form>
     </div>
 
-    <nav class="nav-tabs">
-        <button id="tab-main" class="active" onclick="initScan('самые главные мировые новости последнего часа', this)">ГЛАВНОЕ 🔥</button>
-        <button onclick="initScan('новости видеоигр, консолей и индустрии', this)">ИГРЫ 🎮</button>
-        <button onclick="initScan('новости технологий, AI и гаджетов', this)">ТЕХНО ⚡️</button>
-        <button onclick="initScan('научные открытия, космос и медицина', this)">НАУКА 🧬</button>
-        <button onclick="initScan('новости киберспорта и турниров', this)">ESPORTS 🏆</button>
+    <nav class="tabs-nav">
+        <button id="tab-home" class="active" onclick="sscScan('самые главные мировые новости за последний час', this)">ГЛАВНОЕ 🔥</button>
+        <button onclick="sscScan('новости видеоигр и гейминга сегодня', this)">ИГРЫ 🎮</button>
+        <button onclick="sscScan('новости технологий и нейросетей', this)">ТЕХНО ⚡️</button>
+        <button onclick="sscScan('наука и космос главные новости', this)">НАУКА 🧬</button>
+        <button onclick="sscScan('новости кино и сериалов', this)">КИНО 🍿</button>
     </nav>
 </header>
 
@@ -125,119 +129,119 @@
 </main>
 
 <div id="overlay">
-    <div class="over-head">
-        <span style="font-weight: 900; font-size: 11px; color: var(--accent); letter-spacing: 1.5px;">NEURAL DECODING...</span>
-        <i class="fa-solid fa-xmark" onclick="closeOverlay()" style="font-size: 28px; cursor: pointer;"></i>
+    <div class="over-header">
+        <span style="font-weight: 900; font-size: 10px; color: var(--ssc-primary); letter-spacing: 2px;">SSC DEEP SCAN ACTIVE</span>
+        <i class="fa-solid fa-xmark" onclick="closeOverlay()" style="font-size: 30px; cursor: pointer;"></i>
     </div>
-    <div id="overBody" class="over-content"></div>
+    <div id="overBody" class="over-body"></div>
 </div>
 
 <script>
     const apiKey = "";
-    let lastQuery = 'самые главные мировые новости последнего часа';
+    let currentTopic = 'самые главные мировые новости за последний час';
 
-    async function trinityRequest(userPrompt, useSearch = true) {
+    async function sscRequest(prompt, search = true) {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
         
-        const payload = {
-            contents: [{ parts: [{ text: userPrompt }] }],
-            systemInstruction: { parts: [{ text: "Ты — агрегатор новостей Trinity. Твоя задача: выдавать только актуальные, реальные новости. Используй поиск, чтобы проверить факты." }] }
+        const body = {
+            contents: [{ parts: [{ text: prompt }] }],
+            systemInstruction: { parts: [{ text: "Ты — ядро SSC (Soft Slippers Company). Твоя задача: найти реальные новости. Используй поиск. Выдавай данные СТРОГО по формату." }] }
         };
 
-        if (useSearch) {
-            payload.tools = [{ "google_search": {} }];
-        }
+        if (search) body.tools = [{ "google_search": {} }];
 
-        // Exponential Backoff implementation
+        // SSC Retry Logic with Exponential Backoff
         for (let i = 0; i < 5; i++) {
             try {
-                const response = await fetch(url, {
+                const res = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(body)
                 });
-                if (!response.ok) throw new Error("API Error");
-                const data = await response.json();
+                if (!res.ok) throw new Error("API Limit");
+                const data = await res.json();
                 return data.candidates[0].content.parts[0].text;
-            } catch (err) {
-                if (i === 4) throw err;
+            } catch (e) {
+                if (i === 4) throw e;
                 await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
             }
         }
     }
 
-    async function initScan(topic, btn) {
-        lastQuery = topic;
+    async function sscScan(topic, btn) {
+        currentTopic = topic;
         const feed = document.getElementById('feed');
         if (btn) {
-            document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tabs-nav button').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            document.getElementById('searchInput').value = '';
         }
 
         feed.innerHTML = `
-            <div class="loading-vibe">
-                <div class="trinity-loader"></div>
-                <p style="font-weight: 900; color: #fff; letter-spacing: 1px;">ТРОЙНОЙ СКАН... 📡</p>
-                <p style="font-size: 12px; opacity: 0.6; margin-top: 10px;">Doxy, Foxy и Gemini на связи</p>
+            <div class="ssc-loader-wrap">
+                <div class="ssc-spinner"></div>
+                <p style="font-weight: 900; color: #fff; letter-spacing: 2px;">SSC SCANNING... 🛰️</p>
+                <p style="font-size: 11px; opacity: 0.5; margin-top: 10px;">Обходим фильтры, ищем данные</p>
             </div>`;
 
-        const prompt = `Найди 5 самых свежих и горячих новостей на тему: "${topic}". 
-        Для каждой новости выведи данные строго в таком формате:
-        НОВОСТЬ: [Заголовок]
-        ТЕГ: [Краткий тег]
-        ВРЕМЯ: [Дата и время]
-        --- (разделитель новостей)`;
+        // Упрощенный формат для 100% стабильности
+        const prompt = `Найди 5 новостей: "${topic}". Напиши их в формате:
+        TIT: [Заголовок]
+        TAG: [Тег]
+        TIM: [Время]
+        === (разделитель)`;
 
         try {
-            const raw = await trinityRequest(prompt);
-            const rawItems = raw.split('---').filter(t => t.includes('НОВОСТЬ:'));
+            const raw = await sscRequest(prompt);
+            const blocks = raw.split('===').filter(b => b.includes('TIT:'));
             
-            if (rawItems.length === 0) throw new Error("Parse Fail");
+            if (blocks.length === 0) throw new Error("Empty");
 
             feed.innerHTML = '';
-            rawItems.forEach(block => {
-                const title = block.match(/НОВОСТЬ: (.*)/)?.[1]?.replace(/[\[\]]/g, '') || 'Без заголовка';
-                const tag = block.match(/ТЕГ: (.*)/)?.[1]?.replace(/[\[\]]/g, '') || 'LIVE';
-                const time = block.match(/ВРЕМЯ: (.*)/)?.[1]?.replace(/[\[\]]/g, '') || 'Только что';
+            blocks.forEach(b => {
+                const title = b.match(/TIT: (.*)/)?.[1]?.replace(/[\[\]]/g, '') || 'Новость SSC';
+                const tag = b.match(/TAG: (.*)/)?.[1]?.replace(/[\[\]]/g, '') || 'LIVE';
+                const time = b.match(/TIM: (.*)/)?.[1]?.replace(/[\[\]]/g, '') || 'Сейчас';
 
                 const card = document.createElement('div');
-                card.className = 'news-item';
+                card.className = 'card';
                 card.innerHTML = `
-                    <div class="meta-row">
-                        <span class="tag">${tag}</span>
-                        <span class="date">${time}</span>
+                    <div class="card-glow"></div>
+                    <div class="card-meta">
+                        <span class="card-tag">${tag}</span>
+                        <span class="card-time">${time}</span>
                     </div>
-                    <div class="title-text">${title}</div>
-                    <button class="action-btn" onclick="deepDive('${title.replace(/'/g, "\\'")}')">
-                        <i class="fa-solid fa-microchip"></i> ПОЛНЫЙ АНАЛИЗ
+                    <div class="card-title">${title}</div>
+                    <button class="card-btn" onclick="openDeepScan('${title.replace(/'/g, "\\'")}')">
+                        <i class="fa-solid fa-glasses"></i> ИЗУЧИТЬ ПОДРОБНО
                     </button>
                 `;
                 feed.appendChild(card);
             });
         } catch (e) {
             feed.innerHTML = `
-                <div class="error-card">
-                    <i class="fa-solid fa-triangle-exclamation" style="font-size:40px; color:var(--fox); margin-bottom:20px"></i>
-                    <h3 style="color:#fff">Критический сбой связи</h3>
-                    <p style="font-size:13px; opacity:0.8">Нейросеть отклонила запрос или сервер перегружен. Мы уже перенаправляем трафик.</p>
-                    <button class="retry-btn" onclick="initScan(lastQuery)">ПЕРЕЗАГРУЗИТЬ КАНАЛ</button>
+                <div class="error-state">
+                    <i class="fa-solid fa-microchip" style="font-size:45px; color:var(--ssc-secondary); margin-bottom:20px"></i>
+                    <h3 style="color:#fff">Блокировка SSC-канала</h3>
+                    <p style="font-size:13px; opacity:0.7">Нейросеть отклонила запрос. Мы пробуем обходной путь через кэш.</p>
+                    <button class="btn-ssc-retry" onclick="sscScan(currentTopic)">ПЕРЕПОДКЛЮЧИТЬСЯ</button>
                 </div>`;
         }
     }
 
-    async function deepDive(title) {
+    async function openDeepScan(title) {
         const o = document.getElementById('overlay');
         const b = document.getElementById('overBody');
         o.style.display = 'flex';
         document.body.style.overflow = 'hidden';
-        b.innerHTML = '<div class="loading-vibe"><div class="trinity-loader"></div><p>Декодирую инфо-поток... 🗝️</p></div>';
+        b.innerHTML = '<div class="ssc-loader-wrap"><div class="ssc-spinner"></div><p>Декодирую реальность... ⛸️✨</p></div>';
 
         try {
-            const result = await trinityRequest(`Напиши подробную, профессиональную статью про: "${title}". Используй актуальные данные из поиска, разбей на абзацы, добавь аналитику и эмодзи.`);
-            b.innerHTML = `<h2 style="color:#fff; font-weight:900; line-height:1.3; margin-bottom:25px;">${title}</h2>` + 
-                          result.split('\n').map(p => p.trim() ? `<p style="margin-bottom:20px">${p.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</p>` : '').join('');
+            const content = await sscRequest(`Напиши подробную профессиональную статью про: "${title}". Используй актуальные факты из поиска, добавь 3 ключевых вывода и эмодзи.`);
+            b.innerHTML = `<h2 style="color:#fff; font-size:1.8rem; line-height:1.2; margin-bottom:30px;">${title}</h2>` + 
+                          content.split('\n').map(p => p.trim() ? `<p style="margin-bottom:20px">${p.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</p>` : '').join('');
         } catch (e) {
-            b.innerHTML = '<div class="error-card"><p>Не удалось расшифровать данные.</p></div>';
+            b.innerHTML = '<div class="error-state"><p>Ошибка глубокого сканирования.</p></div>';
         }
     }
 
@@ -245,8 +249,8 @@
         e.preventDefault();
         const v = document.getElementById('searchInput').value.trim();
         if (v) {
-            document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
-            initScan(v);
+            document.querySelectorAll('.tabs-nav button').forEach(b => b.classList.remove('active'));
+            sscScan(`новости: ${v}`);
         }
     }
 
@@ -255,7 +259,7 @@
         document.body.style.overflow = 'auto';
     }
 
-    window.onload = () => initScan('самые главные мировые новости последнего часа');
+    window.onload = () => sscScan('самые главные мировые новости за последний час');
 </script>
 
 </body>
